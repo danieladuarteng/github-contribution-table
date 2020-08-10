@@ -31,18 +31,70 @@ function App() {
   const removeMonthsDuplicates = dateMonths
     .filter((item, index) => dateMonths.indexOf(item) === index);
 
-  const getCell = (day) => orderDate.filter(({date})=> {
+  const getCell = (day, date) => {
+   
+    // const dateTransform = new Date(date);
+    // console.log(dateTransform)
+    // const result = removeMonthsDuplicates
+    //   .includes(months[dateTransform.getMonth()])
+    //   && days[dateTransform.getDay()] === day ? date : 'sem data'
+    //   console.log(result)
+    // return result
+    
+// orderDate.filter(({date})=> {
+//     const dateTransform = new Date(date);
+//     const result = removeMonthsDuplicates
+//       .includes(months[dateTransform.getMonth()])
+//       && days[dateTransform.getDay()] === day
+//     return result
+//   })
+  }
+
+  const getMonth =(date) => {
     const dateTransform = new Date(date);
-    const result = removeMonthsDuplicates
-      .includes(months[dateTransform.getMonth()])
-      && days[dateTransform.getDay()] === day
-    return result
-  })
+    const day = days[dateTransform.getDay()]
+    const month = months[dateTransform.getMonth()]
+    //setDates([...dates.date, ...dates.count, day, month])
+  }
+
+  console.log(getMonth('2017-06-12'))
+  
 
   // Criei um array com os intervalos
-  let d1 = toDate(orderDate.map(({date}) => date).shift()),
+ 
+ let d1 = toDate(orderDate.map(({date}) => date).shift()),
     d2 = toDate(orderDate.map(({date}) => date).pop()),
     intervalos = [];
+  const firstDate = days[new Date(orderDate.map(({date}) => date).shift()).getDay()]
+ //console.log(firstDate)
+ const dayprimeiro =  toDate(orderDate.map(({date}) => date).shift())
+
+ console.log(dayprimeiro)
+
+  switch(firstDate){
+    case 'Mon':
+     d1.setDate( d1.getDate())
+     break
+    case 'Tue':
+     d1.setDate( d1.getDate() -1 )
+     break
+    case 'Wed':
+     d1.setDate( d1.getDate() -2 )
+     break
+    case 'Thu':
+     d1.setDate( d1.getDate() -3 )
+     break
+    case 'Fri':
+     d1.setDate( d1.getDate() -4 )
+     break
+    case 'Sat':
+     d1.setDate( d1.getDate() -5 )
+     break
+    case 'Sun':
+     d1.setDate( d1.getDate() -6 )
+     break
+  }
+  
 
   intervalos.push( toString(d1) );
 
@@ -62,19 +114,43 @@ function App() {
       ('0' + date.getDate()).slice(-2));
   }
 
+  console.log(intervalos)
+
+ const dateTransform = (date) => new Date(date);
+ const day = (date) => days[date.getDay()]
+ const month = (date) => months[date.getMonth()]
+ const date = (value) => dateTransform(value);
+
  const getDates = () => {
   const datasQueExistem = orderDate.map(({date}) => date)
   let arr = []
   for(let i =0; i < datasQueExistem.length; i ++){
     
     if(datasQueExistem.find(e => e === intervalos[i]) === undefined){
-      arr.push({date: intervalos[i], count : 0})
+      const date = dateTransform(intervalos[i]);
+      arr.push({
+        date: intervalos[i],
+        count : 0,
+        day:day(date),
+        month: month(date)
+      })
     } else {
-      arr.push(orderDate[i])
+      const dateOriginal = orderDate[i].date;
+      const count = orderDate[i].count;
+      const dateString = dateTransform(dateOriginal);
+
+      arr.push({
+        date: dateOriginal,
+        count,
+        day:day(dateString),
+        month: month(dateString)
+      })
     }
   }
   return arr
  }
+
+ console.log(dates)
   return (
 
     <table>
@@ -90,9 +166,12 @@ function App() {
         {days.map(day => 
           <tr>
           <th>{day}</th>
-          {dates && dates.map(({date, count}) =>(
-            <td>{count}</td>
+          {dates && dates
+            .filter(item => item.month === 'Oct' && item.day === day  )
+            .map(({date}) =>(
+            <td>{date}</td>
           ))}
+
           </tr>
         )} 
       </tbody>
