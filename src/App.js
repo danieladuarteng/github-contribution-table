@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { data } from './data'
 import Button from '@material-ui/core/Button';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import { data } from './data'
 import { GithubTooltip, useStyles } from "./styled"
 
 function App() {
@@ -34,6 +35,18 @@ function App() {
 
   const removeMonthsDuplicates = dateMonths
     ?.filter((item, index) => dateMonths.indexOf(item) === index);
+
+
+  const toDate = (value) => {
+    let parts = value.split('-');
+    return new Date(parts[0], parts[1] - 1, parts[2]);
+  }
+
+  const toString = (date) => {
+    return (date.getFullYear() + '-' +
+      ('0' + (date.getMonth() + 1)).slice(-2) + '-' +
+      ('0' + date.getDate()).slice(-2));
+  }
 
   const getDates = () => {
     let initialDate = toDate(orderDate.map(({ date }) => date).shift()),
@@ -95,17 +108,6 @@ function App() {
       daysThatHaveNoValue.push(toString(initialDate));
     }
 
-    function toDate(texto) {
-      let parts = texto.split('-');
-      return new Date(parts[0], parts[1] - 1, parts[2]);
-    }
-
-    function toString(date) {
-      return (date.getFullYear() + '-' +
-        ('0' + (date.getMonth() + 1)).slice(-2) + '-' +
-        ('0' + date.getDate()).slice(-2));
-    }
-
     const day = (date) => days[date.getDay()]
     const month = (date) => months[date.getMonth()]
     const year = (date) => date.getFullYear()
@@ -157,7 +159,6 @@ function App() {
     return totalDates
   }
 
-
   const highestCount = dates
     ?.sort((smaller, bigger) => (bigger.count) - new Date(smaller.count))
     .map(({ count }) => count).shift();
@@ -188,49 +189,87 @@ function App() {
     return result;
   }
 
+  const contributions = (year) => dates?.filter((date) => date.year === year)
+    .map(({ count }) => count)
+    .reduce((total, count) => total += count).toLocaleString();
 
   const classes = useStyles();
 
   return (
-
-    <table>
-      <thead>
-        <tr>
-          <td></td>
-          {removeMonthsDuplicates?.map(month => (
-            <td key={month} colSpan={columnSize(month)}>{month}</td>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {days.map(day =>
-          <tr key={day}>
-            <td>{day}</td>
-            {removeMonthsDuplicates?.map(month => {
-              return dates?.sort((a, b) => new Date(a.date) - new Date(b.date))
-                .filter(item => item.month === month && item.day === day)
-                .map(({ date, count, year, dateDay }) => (
-                  <td key={date}
-                    style={{
-                      background: checkColor(count),
-                    }}>
-                    <GithubTooltip
-                      background="#000"
-                      title={
-                        <React.Fragment>
-                          {count === 0 ? 'No' : count} contributions on {month} {dateDay}, {year}
-                        </React.Fragment>
-                      }
-                    >
-                      <Button className={classes.root} />
-                    </GithubTooltip>
-                  </td>
-                ))
-            })}
+    <div className={classes.container}>
+      <table className={classes.table} align='center'>
+        <thead>
+          <tr>
+            <td colSpan="12" align="left">
+              <h2 className={classes.h2}>{contributions(2016)} contributions in 2016</h2>
+            </td>
+            <td colSpan="30" align="right">
+              <p>
+                Contribution settings
+                <ArrowDropDownIcon fontSize="small" viewBox='0 0 24 15' />
+              </p>
+            </td>
           </tr>
-        )}
-      </tbody>
-    </table >
+          <tr style={{ height: '10px' }}>
+            <td />
+            {removeMonthsDuplicates?.map(month => (
+              <td key={month} colSpan={columnSize(month)}>{month}</td>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {
+            days.map(day =>
+              <tr key={day}>
+                <td />
+                {removeMonthsDuplicates?.map(month => {
+                  return dates?.sort((a, b) => new Date(a.date) - new Date(b.date))
+                    .filter(item => item.month === month && item.day === day)
+                    .map(({ date, count, year, dateDay }) => (
+                      <td key={date}
+                        style={{
+                          background: checkColor(count),
+                        }}>
+                        <GithubTooltip
+                          background="#000"
+                          title={
+                            <React.Fragment>
+                              {count === 0 ? 'No' : count} contributions on {month} {dateDay}, {year}
+                            </React.Fragment>
+                          }
+                        >
+                          <Button className={classes.root} />
+                        </GithubTooltip>
+                      </td>
+                    ))
+                })}
+              </tr>
+            )}
+          <tr></tr>
+          <tr>
+            <td colSpan="12" align="left">
+              <a
+                style={{ textDecoration: 'none' }}
+                href="https://docs.github.com/articles/why-are-my-contributions-not-showing-up-on-my-profile"
+              >
+                Learn how we count contributions.
+              </a>
+            </td>
+            <td colSpan="30" align="right">
+              <ul className={classes.legend}>
+                Less
+                <li className={classes.li} style={{ backgroundColor: '#ebedf0' }}></li>
+                <li className={classes.li} style={{ backgroundColor: '#9be9a8' }}></li>
+                <li className={classes.li} style={{ backgroundColor: '#40c463' }}></li>
+                <li className={classes.li} style={{ backgroundColor: '#30a14e' }}></li>
+                <li className={classes.li} style={{ backgroundColor: '#216e39' }}></li>
+                More
+              </ul>
+            </td>
+          </tr>
+        </tbody>
+      </table >
+    </div >
   );
 }
 
