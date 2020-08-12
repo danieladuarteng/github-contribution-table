@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Tooltip from '@material-ui/core/Tooltip';
-import { withStyles, makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 
-export const useStyles = makeStyles((theme) => ({
+export const useStyles = makeStyles(() => ({
   table: {
     fontFamily: '-apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji',
     fontSize: '14px',
@@ -19,14 +19,10 @@ export const useStyles = makeStyles((theme) => ({
     minWidth: '10px',
     minHeight: '10px',
     lineHeight: '0',
-    lineWidth: '0'
   },
-  color0: {
-    background: '#bedf0'
-  }
 }));
 
-export const useStylesBootstrap = makeStyles((theme) => ({
+export const useStylesGithub = makeStyles((theme) => ({
   arrow: {
     color: theme.palette.common.black,
   },
@@ -39,8 +35,8 @@ export const useStylesBootstrap = makeStyles((theme) => ({
   },
 }));
 
-export function BootstrapTooltip(props) {
-  const classes = useStylesBootstrap();
+export function GithubTooltip(props) {
+  const classes = useStylesGithub();
 
   return <Tooltip arrow classes={classes} {...props} />;
 }

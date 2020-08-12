@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { data } from './data'
 import Button from '@material-ui/core/Button';
-import { BootstrapTooltip, useStyles } from "./styled"
+import { GithubTooltip, useStyles } from "./styled"
 
 function App() {
   const [dates, setDates] = useState();
@@ -11,10 +11,9 @@ function App() {
       let result = await getDates();
       result = result
         .sort((a, b) => new Date(a.date) - new Date(b.date));
-      setDates(result)
+      setDates(result);
     }
     fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const orderDate = data
@@ -28,7 +27,7 @@ function App() {
     return months[new Date(date).getMonth()]
   })
 
-  const valorColumn = (month) => {
+  const columnSize = (month) => {
     let result = dateMonths.filter(item => item === month).length
     return result === 7 ? 1 : Math.round(result / 7)
   }
@@ -36,69 +35,93 @@ function App() {
   const removeMonthsDuplicates = dateMonths
     ?.filter((item, index) => dateMonths.indexOf(item) === index);
 
-  // Criei um array com os intervalos
-
-  let d1 = toDate(orderDate.map(({ date }) => date).shift()),
-    d2 = toDate(orderDate.map(({ date }) => date).pop()),
-    intervalos = [];
-  const firstDate = days[new Date(orderDate.map(({ date }) => date).shift()).getDay()]
-
-  switch (firstDate) {
-    case 'Mon':
-      d1.setDate(d1.getDate() - 2)
-      break
-    case 'Tue':
-      d1.setDate(d1.getDate() - 3)
-      break
-    case 'Wed':
-      d1.setDate(d1.getDate() - 4)
-      break
-    case 'Thu':
-      d1.setDate(d1.getDate() - 5)
-      break
-    case 'Fri':
-      d1.setDate(d1.getDate() - 6)
-      break
-    case 'Sat':
-      d1.setDate(d1.getDate() - 7)
-      break
-    default:
-      d1.setDate(d1.getDate())
-      break
-  }
-
-  intervalos.push(toString(d1));
-
-  while (d1 < d2) {
-    d1.setDate(d1.getDate() + 1);
-    intervalos.push(toString(d1));
-  }
-
-  function toDate(texto) {
-    let partes = texto.split('-');
-    return new Date(partes[0], partes[1] - 1, partes[2]);
-  }
-
-  function toString(date) {
-    return (date.getFullYear() + '-' +
-      ('0' + (date.getMonth() + 1)).slice(-2) + '-' +
-      ('0' + date.getDate()).slice(-2));
-  }
-
-  const day = (date) => days[date.getDay()]
-  const month = (date) => months[date.getMonth()]
-  const year = (date) => date.getFullYear()
-  const dateDay = (date) => date.getDate()
   const getDates = () => {
-    const datasQueExistem = orderDate.map(({ date }) => date)
+    let initialDate = toDate(orderDate.map(({ date }) => date).shift()),
+      finalDate = toDate(orderDate.map(({ date }) => date).pop()),
+      daysThatHaveNoValue = [];
 
-    let arr = []
+    switch (days[initialDate.getDay()]) {
+      case 'Mon':
+        initialDate.setDate(initialDate.getDate() - 1)
+        break
+      case 'Tue':
+        initialDate.setDate(initialDate.getDate() - 2)
+        break
+      case 'Wed':
+        initialDate.setDate(initialDate.getDate() - 3)
+        break
+      case 'Thu':
+        initialDate.setDate(initialDate.getDate() - 4)
+        break
+      case 'Fri':
+        initialDate.setDate(initialDate.getDate() - 5)
+        break
+      case 'Sat':
+        initialDate.setDate(initialDate.getDate() - 6)
+        break
+      default:
+        initialDate.setDate(initialDate.getDate())
+        break
+    }
 
-    for (let i = 0; i < intervalos.length; i++) {
-      if (datasQueExistem.find(e => e === intervalos[i]) === undefined) {
-        const date = toDate(intervalos[i]);
-        arr.push({
-          date: intervalos[i],
+    switch (days[finalDate.getDay()]) {
+      case 'Sun':
+        finalDate.setDate(finalDate.getDate() + 6)
+        break
+      case 'Mon':
+        finalDate.setDate(finalDate.getDate() + 5)
+        break
+      case 'Tue':
+        finalDate.setDate(finalDate.getDate() + 4)
+        break
+      case 'Wed':
+        finalDate.setDate(finalDate.getDate() + 3)
+        break
+      case 'Thu':
+        finalDate.setDate(finalDate.getDate() + 2)
+        break
+      case 'Fri':
+        finalDate.setDate(finalDate.getDate() + 1)
+        break
+      default:
+        finalDate.setDate(finalDate.getDate())
+        break
+    }
+
+    daysThatHaveNoValue.push(toString(initialDate));
+
+    while (initialDate < finalDate) {
+      initialDate.setDate(initialDate.getDate() + 1);
+      daysThatHaveNoValue.push(toString(initialDate));
+    }
+
+    function toDate(texto) {
+      let parts = texto.split('-');
+      return new Date(parts[0], parts[1] - 1, parts[2]);
+    }
+
+    function toString(date) {
+      return (date.getFullYear() + '-' +
+        ('0' + (date.getMonth() + 1)).slice(-2) + '-' +
+        ('0' + date.getDate()).slice(-2));
+    }
+
+    const day = (date) => days[date.getDay()]
+    const month = (date) => months[date.getMonth()]
+    const year = (date) => date.getFullYear()
+    const dateDay = (date) => date.getDate()
+
+    const daysThatHaveValue = orderDate.map(({ date }) => date)
+
+    let totalDates = []
+
+    for (let i = 0; i < daysThatHaveNoValue.length; i++) {
+
+      if (daysThatHaveValue.find(e => e === daysThatHaveNoValue[i])
+        === undefined) {
+        const date = toDate(daysThatHaveNoValue[i]);
+        totalDates.push({
+          date: daysThatHaveNoValue[i],
           count: 0,
           day: day(date),
           month: month(date),
@@ -106,19 +129,21 @@ function App() {
           dateDay: dateDay(date)
         })
       }
+
     }
 
-    for (let a = 0; a < datasQueExistem.length; a++) {
+    for (let a = 0; a < daysThatHaveValue.length; a++) {
 
-      if (intervalos.find(e => e === datasQueExistem[a]) !== undefined) {
+      if (daysThatHaveNoValue.find(e => e === daysThatHaveValue[a])
+        !== undefined) {
 
-        const dateOriginal = datasQueExistem[a];
+        const dateOriginal = daysThatHaveValue[a];
         const count = orderDate
-          .filter(item => item.date === datasQueExistem[a])
+          .filter(item => item.date === daysThatHaveValue[a])
           .map(({ count }) => count)
         const dateString = toDate(dateOriginal);
 
-        arr.push({
+        totalDates.push({
           date: dateOriginal,
           count: parseInt(count, 10),
           day: day(dateString),
@@ -129,35 +154,35 @@ function App() {
       }
 
     }
-    return arr
+    return totalDates
   }
 
 
-  const countMaior = dates
-    ?.sort((a, b) => (b.count) - new Date(a.count))
+  const highestCount = dates
+    ?.sort((smaller, bigger) => (bigger.count) - new Date(smaller.count))
     .map(({ count }) => count).shift();
 
   let counts = []
-  for (let i = 1; i <= 50; i++) {
-    counts.push(i)
+  for (let item = 1; item <= 50; item++) {
+    counts.push(item)
   }
 
   const checkColor = (count) => {
     let result = ''
-    const base = Math.round(countMaior / 4)
+    const base = Math.round(highestCount / 4)
     const secondColor = counts.slice(0, base);
-    const terceiraColor = counts.slice(base, base * 2);
-    const quartaColor = counts.slice((base * 2), countMaior - 1);
+    const thirdColor = counts.slice(base, base * 2);
+    const fourthColor = counts.slice((base * 2), highestCount - 1);
 
     if (count === 0) {
       result = '#ebedf0'
     } else if (secondColor.find(e => e === count)) {
       result = '#9be9a8'
-    } else if (terceiraColor.find(e => e === count)) {
+    } else if (thirdColor.find(e => e === count)) {
       result = '#40c463'
-    } else if (quartaColor.find(e => e === count)) {
+    } else if (fourthColor.find(e => e === count)) {
       result = '#30a14e'
-    } else if (count >= countMaior) {
+    } else if (count >= highestCount) {
       result = '#216e39'
     }
     return result;
@@ -168,18 +193,18 @@ function App() {
 
   return (
 
-    <table className={classes.table}>
+    <table>
       <thead>
-        <tr className={classes.button}>
+        <tr>
           <td></td>
           {removeMonthsDuplicates?.map(month => (
-            <td className={classes.button} key={month} colSpan={valorColumn(month)}>{month}</td>
+            <td key={month} colSpan={columnSize(month)}>{month}</td>
           ))}
         </tr>
       </thead>
       <tbody>
         {days.map(day =>
-          <tr key={day} className={classes.button}>
+          <tr key={day}>
             <td>{day}</td>
             {removeMonthsDuplicates?.map(month => {
               return dates?.sort((a, b) => new Date(a.date) - new Date(b.date))
@@ -189,7 +214,7 @@ function App() {
                     style={{
                       background: checkColor(count),
                     }}>
-                    <BootstrapTooltip
+                    <GithubTooltip
                       background="#000"
                       title={
                         <React.Fragment>
@@ -198,13 +223,10 @@ function App() {
                       }
                     >
                       <Button className={classes.root} />
-
-
-                    </BootstrapTooltip>
+                    </GithubTooltip>
                   </td>
                 ))
             })}
-
           </tr>
         )}
       </tbody>
