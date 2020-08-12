@@ -2,6 +2,8 @@
 
 ![](Screenshot_github-contribution-table.png)
 
+[Access the website](https://danieladuarteng.github.io/github-contribution-table/)
+
 The objective about this project is create a github contribution table
 
 ## Required
