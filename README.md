@@ -1,6 +1,6 @@
 # Github Contribution Table
 
-![](github-contribution-table.gif)
+![](githuob-contribution-table.gif)
 
 [Access the website](https://danieladuarteng.github.io/github-contribution-table/)
 
