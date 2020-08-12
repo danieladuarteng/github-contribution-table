@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { data } from './data'
-import './App.css';
+import Button from '@material-ui/core/Button';
+import { BootstrapTooltip, useStyles } from "./styled"
 
 function App() {
   const [dates, setDates] = useState();
@@ -19,23 +20,21 @@ function App() {
   const orderDate = data
     .sort((a, b) => new Date(a.date) - new Date(b.date));
 
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const daysMap = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat',];
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
     'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-  const dateMonths = orderDate.map(({ date }) => {
+  const dateMonths = dates?.map(({ date }) => {
     return months[new Date(date).getMonth()]
   })
 
   const valorColumn = (month) => {
     let result = dateMonths.filter(item => item === month).length
-
-    return Math.round(result / 7)
+    return result === 7 ? 1 : Math.round(result / 7)
   }
 
   const removeMonthsDuplicates = dateMonths
-    .filter((item, index) => dateMonths.indexOf(item) === index);
+    ?.filter((item, index) => dateMonths.indexOf(item) === index);
 
   // Criei um array com os intervalos
 
@@ -45,23 +44,23 @@ function App() {
   const firstDate = days[new Date(orderDate.map(({ date }) => date).shift()).getDay()]
 
   switch (firstDate) {
-    case 'Tue':
-      d1.setDate(d1.getDate() - 1)
-      break
-    case 'Wed':
+    case 'Mon':
       d1.setDate(d1.getDate() - 2)
       break
-    case 'Thu':
+    case 'Tue':
       d1.setDate(d1.getDate() - 3)
       break
-    case 'Fri':
+    case 'Wed':
       d1.setDate(d1.getDate() - 4)
       break
-    case 'Sat':
+    case 'Thu':
       d1.setDate(d1.getDate() - 5)
       break
-    case 'Sun':
+    case 'Fri':
       d1.setDate(d1.getDate() - 6)
+      break
+    case 'Sat':
+      d1.setDate(d1.getDate() - 7)
       break
     default:
       d1.setDate(d1.getDate())
@@ -86,9 +85,10 @@ function App() {
       ('0' + date.getDate()).slice(-2));
   }
 
-  const day = (date) => daysMap[date.getDay()]
+  const day = (date) => days[date.getDay()]
   const month = (date) => months[date.getMonth()]
-
+  const year = (date) => date.getFullYear()
+  const dateDay = (date) => date.getDate()
   const getDates = () => {
     const datasQueExistem = orderDate.map(({ date }) => date)
 
@@ -101,7 +101,9 @@ function App() {
           date: intervalos[i],
           count: 0,
           day: day(date),
-          month: month(date)
+          month: month(date),
+          year: year(date),
+          dateDay: dateDay(date)
         })
       }
     }
@@ -120,7 +122,9 @@ function App() {
           date: dateOriginal,
           count: parseInt(count, 10),
           day: day(dateString),
-          month: month(dateString)
+          month: month(dateString),
+          year: year(dateString),
+          dateDay: dateDay(dateString)
         })
       }
 
@@ -128,35 +132,83 @@ function App() {
     return arr
   }
 
-  console.log(dates)
+
+  const countMaior = dates
+    ?.sort((a, b) => (b.count) - new Date(a.count))
+    .map(({ count }) => count).shift();
+
+  let counts = []
+  for (let i = 1; i <= 50; i++) {
+    counts.push(i)
+  }
+
+  const checkColor = (count) => {
+    let result = ''
+    const base = Math.round(countMaior / 4)
+    const secondColor = counts.slice(0, base);
+    const terceiraColor = counts.slice(base, base * 2);
+    const quartaColor = counts.slice((base * 2), countMaior - 1);
+
+    if (count === 0) {
+      result = '#ebedf0'
+    } else if (secondColor.find(e => e === count)) {
+      result = '#9be9a8'
+    } else if (terceiraColor.find(e => e === count)) {
+      result = '#40c463'
+    } else if (quartaColor.find(e => e === count)) {
+      result = '#30a14e'
+    } else if (count >= countMaior) {
+      result = '#216e39'
+    }
+    return result;
+  }
+
+
+  const classes = useStyles();
 
   return (
 
-    <table>
+    <table className={classes.table}>
       <thead>
-        <tr>
-          <th></th>
-          {removeMonthsDuplicates.map(month => (
-            <th colSpan={valorColumn(month)}>{month}</th>
+        <tr className={classes.button}>
+          <td></td>
+          {removeMonthsDuplicates?.map(month => (
+            <td className={classes.button} key={month} colSpan={valorColumn(month)}>{month}</td>
           ))}
         </tr>
       </thead>
       <tbody>
         {days.map(day =>
-          <tr>
-            <th>{day}</th>
-            {removeMonthsDuplicates.map(month => {
-              return dates && dates
+          <tr key={day} className={classes.button}>
+            <td>{day}</td>
+            {removeMonthsDuplicates?.map(month => {
+              return dates?.sort((a, b) => new Date(a.date) - new Date(b.date))
                 .filter(item => item.month === month && item.day === day)
-                .map(({ date, count }) => (
-                  <td>{count}</td>
+                .map(({ date, count, year, dateDay }) => (
+                  <td key={date}
+                    style={{
+                      background: checkColor(count),
+                    }}>
+                    <BootstrapTooltip
+                      background="#000"
+                      title={
+                        <React.Fragment>
+                          {count === 0 ? 'No' : count} contributions on {month} {dateDay}, {year}
+                        </React.Fragment>
+                      }
+                    >
+                      <Button className={classes.root} />
+
+
+                    </BootstrapTooltip>
+                  </td>
                 ))
             })}
 
           </tr>
         )}
       </tbody>
-    </table>
+    </table >
   );
 }
 
